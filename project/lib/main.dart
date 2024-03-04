@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'diary_entry_page.dart';
 
@@ -6,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -29,6 +30,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<String> diaryEntries = [];
+  List<List<File>> diaryImages = []; 
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +53,17 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(
                   builder: (context) => DiaryEntryPage(
                     initialText: entry,
-                    onUpdate: (text) {
+                    initialImages: diaryImages[index], 
+                    onUpdate: (text, images) {
                       setState(() {
                         diaryEntries[index] = text;
+                        diaryImages[index] = images; 
                       });
                     },
                     onDelete: () {
                       setState(() {
                         diaryEntries.removeAt(index);
+                        diaryImages.removeAt(index); 
                       });
                       Navigator.pop(context);
                     },
@@ -92,22 +97,21 @@ class _HomePageState extends State<HomePage> {
           final newEntry = await Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => DiaryEntryPage(
-                      onUpdate: (text) {
-                        if (!diaryEntries.contains(text)) {
-                          setState(() {
-                            diaryEntries.add(text);
-                          });
-                        }
-                      },
-                    )),
+              builder: (context) => DiaryEntryPage(
+                onUpdate: (text, images) {
+                  setState(() {
+                    diaryEntries.add(text);
+                    diaryImages.add(images); 
+                  });
+                },
+              ),
+            ),
           );
           if (newEntry != null) {
-            if (!diaryEntries.contains(newEntry)) {
-              setState(() {
-                diaryEntries.add(newEntry);
-              });
-            }
+            setState(() {
+              diaryEntries.add(newEntry);
+              diaryImages.add([]); 
+            });
           }
         },
         child: const Icon(Icons.add),
