@@ -6,18 +6,18 @@ class DiaryEntryPage extends StatefulWidget {
   final VoidCallback? onDelete;
 
   const DiaryEntryPage({
-    Key? key,
+    super.key,
     this.initialText,
     required this.onUpdate,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
-  _DiaryEntryPageState createState() => _DiaryEntryPageState();
+  State<DiaryEntryPage> createState() => _DiaryEntryPageState();
 }
 
 class _DiaryEntryPageState extends State<DiaryEntryPage> {
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
