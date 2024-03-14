@@ -1,17 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'mood_tracker.dart';
 
 class DiaryEntryPage extends StatefulWidget {
   final String? initialText;
   final List<File>? initialImages;
-  final Function(String, List<File>) onUpdate;
+  final int initialMood;
+  final Function(String, List<File>, int) onUpdate;
   final VoidCallback? onDelete;
 
   const DiaryEntryPage({
     Key? key,
     this.initialText,
     this.initialImages,
+    required this.initialMood,
     required this.onUpdate,
     this.onDelete,
   }) : super(key: key);
@@ -22,7 +25,8 @@ class DiaryEntryPage extends StatefulWidget {
 
 class _DiaryEntryPageState extends State<DiaryEntryPage> {
   final TextEditingController _textEditingController = TextEditingController();
-  List<File> _images = []; 
+  final List<File> _images = [];
+  late int _selectedMood;
 
   @override
   void initState() {
@@ -31,6 +35,7 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
     if (widget.initialImages != null) {
       _images.addAll(widget.initialImages!);
     }
+    _selectedMood = widget.initialMood;
   }
 
   @override
@@ -86,6 +91,15 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
                 },
               ),
             ),
+            MoodTracker(
+              initialMood: _selectedMood,
+              onMoodSelected: (mood) {
+                setState(() {
+                  _selectedMood = mood;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -94,14 +108,13 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
 
   void _saveEntry() {
     String entryText = _textEditingController.text;
-    widget.onUpdate(entryText, _images);
+    widget.onUpdate(entryText, _images, _selectedMood);
     Navigator.pop(context, entryText);
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
     if (pickedFile != null) {
       setState(() {
         _images.add(File(pickedFile.path));

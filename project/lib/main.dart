@@ -30,7 +30,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<String> diaryEntries = [];
-  List<List<File>> diaryImages = []; 
+  List<List<File>> diaryImages = [];
+  List<int> moodIndices = [];
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
         itemCount: diaryEntries.length,
         itemBuilder: (context, index) {
           final entry = diaryEntries[index];
+          final moodIndex = moodIndices[index];
           return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -53,17 +55,20 @@ class _HomePageState extends State<HomePage> {
                 MaterialPageRoute(
                   builder: (context) => DiaryEntryPage(
                     initialText: entry,
-                    initialImages: diaryImages[index], 
-                    onUpdate: (text, images) {
+                    initialImages: diaryImages[index],
+                    initialMood: moodIndex,
+                    onUpdate: (text, images, mood) {
                       setState(() {
                         diaryEntries[index] = text;
-                        diaryImages[index] = images; 
+                        diaryImages[index] = images;
+                        moodIndices[index] = mood;
                       });
                     },
                     onDelete: () {
                       setState(() {
                         diaryEntries.removeAt(index);
-                        diaryImages.removeAt(index); 
+                        diaryImages.removeAt(index);
+                        moodIndices.removeAt(index);
                       });
                       Navigator.pop(context);
                     },
@@ -86,6 +91,10 @@ class _HomePageState extends State<HomePage> {
                     style: const TextStyle(color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
+                  Text(
+                    'Mood: $moodIndex',
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
             ),
@@ -94,25 +103,21 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final newEntry = await Navigator.push(
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DiaryEntryPage(
-                onUpdate: (text, images) {
+                onUpdate: (text, images, mood) {
                   setState(() {
                     diaryEntries.add(text);
-                    diaryImages.add(images); 
+                    diaryImages.add(images);
+                    moodIndices.add(mood);
                   });
                 },
+                initialMood: 2,
               ),
             ),
           );
-          if (newEntry != null) {
-            setState(() {
-              diaryEntries.add(newEntry);
-              diaryImages.add([]); 
-            });
-          }
         },
         child: const Icon(Icons.add),
       ),
