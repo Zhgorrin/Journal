@@ -5,8 +5,7 @@ class MoodTracker extends StatefulWidget {
   final Function(int) onMoodSelected;
 
   const MoodTracker(
-      {Key? key, required this.initialMood, required this.onMoodSelected})
-      : super(key: key);
+      {super.key, required this.initialMood, required this.onMoodSelected});
 
   @override
   _MoodTrackerState createState() => _MoodTrackerState();

@@ -11,13 +11,13 @@ class DiaryEntryPage extends StatefulWidget {
   final VoidCallback? onDelete;
 
   const DiaryEntryPage({
-    Key? key,
+    super.key,
     this.initialText,
     this.initialImages,
     required this.initialMood,
     required this.onUpdate,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   State<DiaryEntryPage> createState() => _DiaryEntryPageState();
@@ -29,7 +29,7 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
   late int _selectedMood;
 
   @override
-   initState() {
+  initState() {
     super.initState();
     _textEditingController.text = widget.initialText ?? '';
     if (widget.initialImages != null) {
@@ -54,6 +54,14 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
             icon: const Icon(Icons.image),
             onPressed: () {
               _pickImage();
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: () {
+              if (widget.onDelete != null) {
+                widget.onDelete!();
+              }
             },
           ),
         ],

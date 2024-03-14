@@ -58,7 +58,7 @@ Future<Database> openMyDatabase() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class MyApp extends StatelessWidget {
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -90,7 +90,8 @@ class _HomePageState extends State<HomePage> {
 
   void _loadEntries() async {
     final Database database = await openMyDatabase();
-    final List<Map<String, dynamic>> maps = await database.query('diary_entries');
+    final List<Map<String, dynamic>> maps =
+        await database.query('diary_entries');
     setState(() {
       diaryEntries = List.generate(maps.length, (i) {
         return DiaryEntry.fromMap(maps[i]);
@@ -150,22 +151,38 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _navigateToDiaryEntryPage(BuildContext context, DiaryEntry? entry) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DiaryEntryPage(
-          initialText: entry?.text,
-          initialImages: entry?.imagePaths.map((path) => File(path)).toList() ?? [],
-          initialMood: entry?.moodIndex ?? 2,
-          onUpdate: (text, images, mood) {
-            if (entry != null) {
+  Future<void> _navigateToDiaryEntryPage(
+      BuildContext context, DiaryEntry? entry) async {
+    if (entry != null) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DiaryEntryPage(
+            initialText: entry.text,
+            initialImages: entry.imagePaths.map((path) => File(path)).toList(),
+            initialMood: entry.moodIndex,
+            onUpdate: (text, images, mood) {
               setState(() {
                 entry.text = text;
                 entry.imagePaths = images.map((image) => image.path).toList();
                 entry.moodIndex = mood;
               });
-            } else {
+              _saveEntryToDatabase(entry);
+            },
+            onDelete: () async {
+              await _deleteEntry(entry);
+              Navigator.pop(context);
+            },
+          ),
+        ),
+      );
+    } else {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DiaryEntryPage(
+            initialMood: 2,
+            onUpdate: (text, images, mood) {
               setState(() {
                 diaryEntries.add(DiaryEntry(
                   id: diaryEntries.length + 1,
@@ -174,12 +191,12 @@ class _HomePageState extends State<HomePage> {
                   moodIndex: mood,
                 ));
               });
-            }
-            _saveEntryToDatabase(entry);
-          },
+              _saveEntryToDatabase(null);
+            },
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   Future<void> _saveEntryToDatabase(DiaryEntry? entry) async {
@@ -199,5 +216,17 @@ class _HomePageState extends State<HomePage> {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
+  }
+
+  Future<void> _deleteEntry(DiaryEntry entry) async {
+    final Database database = await openMyDatabase();
+    await database.delete(
+      'diary_entries',
+      where: 'id = ?',
+      whereArgs: [entry.id],
+    );
+    setState(() {
+      diaryEntries.remove(entry);
+    });
   }
 }
