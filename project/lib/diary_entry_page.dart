@@ -29,7 +29,7 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
   late int _selectedMood;
 
   @override
-  void initState() {
+   initState() {
     super.initState();
     _textEditingController.text = widget.initialText ?? '';
     if (widget.initialImages != null) {
@@ -44,11 +44,6 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
       appBar: AppBar(
         title: const Text('Diary Entry'),
         actions: [
-          if (widget.onDelete != null)
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: widget.onDelete,
-            ),
           IconButton(
             icon: const Icon(Icons.save),
             onPressed: () {
@@ -109,7 +104,7 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
   void _saveEntry() {
     String entryText = _textEditingController.text;
     widget.onUpdate(entryText, _images, _selectedMood);
-    Navigator.pop(context, entryText);
+    Navigator.pop(context);
   }
 
   Future<void> _pickImage() async {
