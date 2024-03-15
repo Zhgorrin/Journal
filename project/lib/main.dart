@@ -71,7 +71,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'My Diary App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: ThemeData.dark().canvasColor,
+        colorScheme: ColorScheme.dark(
+          secondary: Colors.green[900]!,
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+          titleLarge: TextStyle(color: Colors.white),
+        ),
+        appBarTheme: const AppBarTheme(),
       ),
       home: const HomePage(),
     );
@@ -116,7 +126,10 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('My Diary')),
+      appBar: AppBar(
+        title: const Center(child: Text('My Diary')),
+        backgroundColor: const Color.fromARGB(255, 31, 30, 30),
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -136,18 +149,39 @@ class _HomePageState extends State<HomePage> {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(8),
+                color: Colors.green[900],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Mood: ${moodEmojiMap[entry.moodIndex]}',
-                    style: const TextStyle(color: Colors.black),
+                  const Center(
+                    child: Text(
+                      'Mood:',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Date: ${DateFormat.yMd().add_jm().format(entry.dateTime)}',
-                    style: const TextStyle(color: Colors.black),
+                  SizedBox(
+                    height: 100,
+                    child: Center(
+                      child: Text(
+                        '${moodEmojiMap[entry.moodIndex]}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 75,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Center(
+                    child: Text(
+                      'Date: ${DateFormat.yMd().format(entry.dateTime)}\n'
+                      'Time: ${DateFormat.jm().format(entry.dateTime)}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ),
                 ],
               ),
@@ -159,6 +193,7 @@ class _HomePageState extends State<HomePage> {
         onPressed: () async {
           await _navigateToDiaryEntryPage(context, null);
         },
+        backgroundColor: Colors.green[900],
         child: const Icon(Icons.add),
       ),
     );
