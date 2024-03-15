@@ -13,6 +13,7 @@ void main() {
 class DiaryEntry {
   int id;
   String text;
+  ThemeData themeData;
   List<String> imagePaths;
   int moodIndex;
   DateTime dateTime;
@@ -20,6 +21,7 @@ class DiaryEntry {
   DiaryEntry({
     required this.id,
     required this.text,
+    required this.themeData,
     required this.imagePaths,
     required this.moodIndex,
     required this.dateTime,
@@ -29,6 +31,7 @@ class DiaryEntry {
     return {
       'id': id,
       'text': text,
+      'themeData': themeData,
       'imagePaths': imagePaths.join(','),
       'moodIndex': moodIndex,
       'dateTime': dateTime.millisecondsSinceEpoch,
@@ -39,6 +42,7 @@ class DiaryEntry {
     return DiaryEntry(
       id: map['id'],
       text: map['text'],
+      themeData: map['themeData'],
       imagePaths: map['imagePaths'].split(','),
       moodIndex: map['moodIndex'],
       dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
@@ -55,6 +59,7 @@ Future<Database> openMyDatabase() async {
           CREATE TABLE diary_entries(
             id INTEGER PRIMARY KEY,
             text TEXT,
+            themeData THEMEDATA,
             imagePaths TEXT,
             moodIndex INTEGER,
             dateTime INTEGER
@@ -207,12 +212,14 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder: (context) => DiaryEntryPage(
             initialText: entry.text,
+            initialTheme: entry.themeData,
             initialImages: entry.imagePaths.map((path) => File(path)).toList(),
             initialMood: entry.moodIndex,
-            onUpdate: (text, images, mood) {
+            onUpdate: (text, images, themeData, mood) {
               setState(() {
                 entry.text = text;
                 entry.imagePaths = images.map((image) => image.path).toList();
+                entry.themeData = themeData;
                 entry.moodIndex = mood;
               });
               _saveEntryToDatabase(entry);
@@ -230,11 +237,13 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(
           builder: (context) => DiaryEntryPage(
             initialMood: 2,
-            onUpdate: (text, images, mood) {
+            initialTheme: ThemeData.dark(),
+            onUpdate: (text, images, themeData, mood) {
               setState(() {
                 diaryEntries.add(DiaryEntry(
                   id: diaryEntries.length + 1,
                   text: text,
+                  themeData: themeData,
                   imagePaths: images.map((image) => image.path).toList(),
                   moodIndex: mood,
                   dateTime: DateTime.now(),
