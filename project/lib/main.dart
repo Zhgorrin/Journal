@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/intl.dart';
 import 'diary_entry_page.dart';
 
 void main() {
@@ -14,12 +15,14 @@ class DiaryEntry {
   String text;
   List<String> imagePaths;
   int moodIndex;
+  DateTime dateTime;
 
   DiaryEntry({
     required this.id,
     required this.text,
     required this.imagePaths,
     required this.moodIndex,
+    required this.dateTime,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,6 +31,7 @@ class DiaryEntry {
       'text': text,
       'imagePaths': imagePaths.join(','),
       'moodIndex': moodIndex,
+      'dateTime': dateTime.millisecondsSinceEpoch,
     };
   }
 
@@ -37,6 +41,7 @@ class DiaryEntry {
       text: map['text'],
       imagePaths: map['imagePaths'].split(','),
       moodIndex: map['moodIndex'],
+      dateTime: DateTime.fromMillisecondsSinceEpoch(map['dateTime']),
     );
   }
 }
@@ -51,7 +56,8 @@ Future<Database> openMyDatabase() async {
             id INTEGER PRIMARY KEY,
             text TEXT,
             imagePaths TEXT,
-            moodIndex INTEGER
+            moodIndex INTEGER,
+            dateTime INTEGER
           )
           ''');
   });
@@ -81,6 +87,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<DiaryEntry> diaryEntries = [];
+
+  Map<int, String> moodEmojiMap = {
+    0: '😢',
+    1: '😞',
+    2: '😐',
+    3: '😊',
+    4: '😄',
+  };
 
   @override
   void initState() {
@@ -124,17 +138,16 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    entry.text,
-                    style: const TextStyle(color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
+                    'Mood: ${moodEmojiMap[entry.moodIndex]}',
+                    style: const TextStyle(color: Colors.black),
                   ),
+                  const SizedBox(height: 10),
                   Text(
-                    'Mood: ${entry.moodIndex}',
-                    style: const TextStyle(color: Colors.white),
+                    'Date: ${DateFormat.yMd().add_jm().format(entry.dateTime)}',
+                    style: const TextStyle(color: Colors.black),
                   ),
                 ],
               ),
@@ -189,6 +202,7 @@ class _HomePageState extends State<HomePage> {
                   text: text,
                   imagePaths: images.map((image) => image.path).toList(),
                   moodIndex: mood,
+                  dateTime: DateTime.now(),
                 ));
               });
               _saveEntryToDatabase(null);
