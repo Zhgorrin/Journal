@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                         '${moodEmojiMap[entry.moodIndex]}',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 75,
+                          fontSize: 71,
                         ),
                       ),
                     ),

@@ -27,6 +27,8 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
   final TextEditingController _textEditingController = TextEditingController();
   final List<File> _images = [];
   late int _selectedMood;
+  bool _isKeyboardVisible = false;
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -36,6 +38,9 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
       _images.addAll(widget.initialImages!);
     }
     _selectedMood = widget.initialMood;
+
+    // Add listener to detect keyboard visibility
+    _addListenerForKeyboard();
   }
 
   @override
@@ -72,12 +77,14 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
+        body: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Expanded(
+              SizedBox(
+                height: _isKeyboardVisible ? 100 : 300,
                 child: TextField(
+                  focusNode: _focusNode,
                   controller: _textEditingController,
                   maxLines: null,
                   expands: true,
@@ -109,13 +116,17 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
                   scrollDirection: Axis.horizontal,
                   itemCount: _images.length,
                   itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Image.file(_images[index]),
+                    return GestureDetector(
+                      onTap: () => _showImageDialog(index),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Image.file(_images[index]),
+                      ),
                     );
                   },
                 ),
               ),
+              const SizedBox(height: 10),
               MoodTracker(
                 initialMood: _selectedMood,
                 onMoodSelected: (mood) {
@@ -148,9 +159,34 @@ class _DiaryEntryPageState extends State<DiaryEntryPage> {
     }
   }
 
+  void _showImageDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Image.file(_images[index]),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _textEditingController.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _addListenerForKeyboard() {
+    _focusNode.addListener(() {
+      final isKeyboardOpen = _focusNode.hasFocus;
+      if (isKeyboardOpen && !_isKeyboardVisible) {
+        setState(() {
+          _isKeyboardVisible = true;
+        });
+      } else if (!isKeyboardOpen && _isKeyboardVisible) {
+        setState(() {
+          _isKeyboardVisible = false;
+        });
+      }
+    });
   }
 }
